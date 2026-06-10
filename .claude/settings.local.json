@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:platform.xiaomimimo.com)",
+      "Bash(curl -s -L \"https://platform.xiaomimimo.com/docs/zh-CN/welcome\")"
+    ]
+  }
+}
