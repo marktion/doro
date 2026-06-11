@@ -7,8 +7,11 @@ export const useSessionStore = defineStore('session', () => {
   // 会话列表
   const sessions = ref<SessionInfo[]>([]);
 
-  // 当前选中的会话
-  const selectedSession = ref<SessionInfo | null>(null);
+  // 当前选中的会话（从localStorage恢复）
+  const selectedSession = ref<SessionInfo | null>(() => {
+    const saved = localStorage.getItem('doro_selected_session');
+    return saved ? JSON.parse(saved) : null;
+  });
 
   // 加载状态
   const isLoading = ref(false);
@@ -21,11 +24,13 @@ export const useSessionStore = defineStore('session', () => {
   // 选择会话
   function selectSession(session: SessionInfo) {
     selectedSession.value = session;
+    localStorage.setItem('doro_selected_session', JSON.stringify(session));
   }
 
   // 清除选中
   function clearSelection() {
     selectedSession.value = null;
+    localStorage.removeItem('doro_selected_session');
   }
 
   // 删除会话

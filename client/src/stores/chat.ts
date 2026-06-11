@@ -1,6 +1,6 @@
 // Pinia Store - 聊天消息
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import type { SDKMessage, AssistantMessage, StreamEvent, ResultMessage } from '../types/agent';
 
 export interface ChatMessage {
@@ -11,6 +11,7 @@ export interface ChatMessage {
   toolName?: string;
   toolInput?: Record<string, unknown>;
   isPartial?: boolean;
+  ttsRequested?: boolean;
 }
 
 export const useChatStore = defineStore('chat', () => {
@@ -18,14 +19,49 @@ export const useChatStore = defineStore('chat', () => {
   const messages = ref<ChatMessage[]>([]);
 
   // 当前会话ID
-  const currentSessionId = ref<string | null>(null);
+  const _currentSessionId = ref<string | null>(() => {
+    return localStorage.getItem('doro_current_session_id');
+  });
+
+  // 使用computed来同步localStorage
+  const currentSessionId = computed({
+    get: () => _currentSessionId.value,
+    set: (value) => {
+      _currentSessionId.value = value;
+      if (value) {
+        localStorage.setItem('doro_current_session_id', value);
+      } else {
+        localStorage.removeItem('doro_current_session_id');
+      }
+    }
+  });
+
+  // 用户消息缓存（按会话ID存储，使用普通对象而非Map）
+  const userMessagesCache = ref<Record<string, ChatMessage[]>>(() => {
+    const saved = localStorage.getItem('doro_user_messages_cache');
+    return saved ? JSON.parse(saved) : {};
+  });
 
   // 流式文本缓冲
   const streamBuffer = ref('');
 
+  // 保存用户消息缓存到localStorage
+  function saveUserMessagesCache() {
+    localStorage.setItem('doro_user_messages_cache', JSON.stringify(userMessagesCache.value));
+  }
+
   // 添加消息
   function addMessage(message: ChatMessage) {
     messages.value.push(message);
+
+    // 如果是用户消息，保存到缓存
+    if (message.type === 'user' && currentSessionId.value) {
+      if (!userMessagesCache.value[currentSessionId.value]) {
+        userMessagesCache.value[currentSessionId.value] = [];
+      }
+      userMessagesCache.value[currentSessionId.value].push(message);
+      saveUserMessagesCache();
+    }
   }
 
   // 处理Agent SDK消息
@@ -130,12 +166,18 @@ export const useChatStore = defineStore('chat', () => {
     streamBuffer.value = '';
   }
 
+  // 获取缓存的用户消息
+  function getCachedUserMessages(sessionId: string): ChatMessage[] {
+    return userMessagesCache.value[sessionId] || [];
+  }
+
   return {
     messages,
     currentSessionId,
     streamBuffer,
     addMessage,
     handleAgentMessage,
-    clearMessages
+    clearMessages,
+    getCachedUserMessages
   };
 });
