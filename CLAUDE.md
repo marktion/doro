@@ -129,3 +129,14 @@ Agent SDK返回的用户消息 `content` 是数组格式（`[{type: "text", text
 - 语音打断功能（播放中可打断）
 - 错误处理和用户提示优化
 - 主题切换（深色/浅色模式）
+
+## Windows 开发注意事项
+
+### GitHub 访问
+Windows 的 schannel 在检查 SSL 证书吊销状态时会失败（CRYPT_E_NO_REVOCATION_CHECK）。使用 curl 访问 GitHub API 时需要添加 `--ssl-no-revoke` 参数：
+```bash
+curl --ssl-no-revoke -sL "https://api.github.com/..."
+```
+
+### Git 推送
+已配置 SSH key 推送到 `git@github.com:marktion/doro.git`，使用 SSH 方式无需额外认证。
