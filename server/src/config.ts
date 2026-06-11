@@ -12,7 +12,7 @@ export const WS_PORT = parseInt(process.env.WS_PORT || '3000', 10);
 // MiMo API配置
 export const MIMO_API_KEY = process.env.MIMO_API_KEY || '';
 export const MIMO_ASR_ENDPOINT = 'https://api.xiaomimimo.com/v1/chat/completions';
-export const MIMO_TTS_ENDPOINT = 'https://api.xiaomimimo.com/v1/audio/speech';
+export const MIMO_TTS_ENDPOINT = 'https://api.xiaomimimo.com/v1/chat/completions';
 
 // Agent SDK配置
 export const AGENT_CWD = process.env.AGENT_CWD || process.cwd();

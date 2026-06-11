@@ -28,3 +28,6 @@ npm-debug.log*
 
 # 测试覆盖率
 coverage/
+
+# 测试音频文件
+server/test-tts*.wav
